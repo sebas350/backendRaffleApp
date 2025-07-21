@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Participant } from './entities/participant.entity';
@@ -15,6 +15,13 @@ export class ParticipantsService {
   }
   
   async create(data: Partial<Participant>): Promise<Participant> {
+  const existing = await this.participantRepo.findOne({
+    where: { number: data.number },
+  });
+
+  if (existing) {
+    throw new ConflictException(`El número ${data.number} ya está ocupado.`);
+  }
     const participant = this.participantRepo.create(data);
     return this.participantRepo.save(participant);
   }
