@@ -14,6 +14,11 @@ export class ParticipantsService {
     return this.participantRepo.find();
   }
   
+  async findByNumber(number: string): Promise<Participant | null> {
+  return this.participantRepo.findOne({
+    where: { number },
+  });
+}  
   async create(data: Partial<Participant>): Promise<Participant> {
   const existing = await this.participantRepo.findOne({
     where: { number: data.number },
