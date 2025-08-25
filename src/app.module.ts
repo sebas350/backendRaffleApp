@@ -4,6 +4,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ParticipantsModule } from './participants/participants.module';
 import { Participant } from './participants/entities/participant.entity';
+import { PaymentsModule } from './payments/payments.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { Participant } from './participants/entities/participant.entity';
       synchronize: true, // ponelo en true solo para desarrollo, nunca en producción
     }),
     ParticipantsModule,
+    ConfigModule.forRoot({ isGlobal: true }),
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
