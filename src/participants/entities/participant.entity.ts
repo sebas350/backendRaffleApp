@@ -19,6 +19,9 @@ export class Participant {
 
   @Column()
   mail: string;
+  
+  @Column({ nullable: true })
+  payment_id: string;
 
 }
 

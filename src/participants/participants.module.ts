@@ -8,5 +8,6 @@ import { ParticipantsController } from './participants.controller';
   imports: [TypeOrmModule.forFeature([Participant])],
   providers: [ParticipantsService],
   controllers: [ParticipantsController],
+  exports: [ParticipantsService],
 })
 export class ParticipantsModule {}

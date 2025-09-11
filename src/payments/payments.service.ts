@@ -1,42 +1,63 @@
-import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
-import { MercadoPagoPayment } from './types';
-import { CreatePaymentDto } from './dto/create-payment.dto';
+import { Injectable } from '@nestjs/common';
+import { MercadoPagoConfig, Payment } from 'mercadopago';
+import { ParticipantsService } from '../participants/participants.service';
+import { Participant } from '../participants/entities/participant.entity';
 
 @Injectable()
 export class PaymentsService {
-  private readonly accessToken: string;
+  private payment: Payment;
 
-  constructor(private readonly configService: ConfigService) {
-    this.accessToken = this.configService.get<string>('MERCADO_PAGO_ACCESS_TOKEN')!;
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly participantsService: ParticipantsService,
+  ) {
+    const client = new MercadoPagoConfig({
+      accessToken: this.configService.get<string>('MERCADO_PAGO_ACCESS_TOKEN')!,
+    });
+    this.payment = new Payment(client);
   }
 
-  async createPayment(paymentData: any) {
-  try {
-    const res = await axios.post(
-      'https://api.mercadopago.com/v1/payments',
-      {
-        token: paymentData.token,
-        issuer_id: paymentData.issuer_id,
-        payment_method_id: paymentData.payment_method_id,
-        transaction_amount: paymentData.transaction_amount,
-        installments: paymentData.installments,
-        payer: {
-          email: paymentData.payer.email,
-          identification: {
-            type: paymentData.payer.identification.type,
-            number: paymentData.payer.identification.number,
-          },
-        },
+  async createPayment(paymentData: any, participantData: Partial<Participant>) {
+    try {  
+      const response = await this.payment.create({
+      body: {
+        ...paymentData,
+        transaction_amount: 1000,
       },
-      { headers: { Authorization: `Bearer ${this.accessToken}` } },
-    );
+    });
+    
 
-    return res.data;
-  } catch (err: any) {
-    console.error('❌ Error MercadoPago:', err.response?.data || err.message);
-    throw err;
+      // Evaluamos el estado del pago
+      const status = response.status;
+
+      if (status === 'approved') {
+        const participant = await this.participantsService.create(participantData);
+        return {
+          message: 'Gracias por paricipar',
+          
+          validation: true,
+        };
+      }
+
+      if (status === 'in_process' || status === 'pending') {
+        const participant = await this.participantsService.create(participantData);
+        return {
+          validation: true,
+          message:
+            'El pago está en proceso. Se registró el participante, recibirá un email cuando el pago se confirme.',
+        };
+      }
+
+      if (status === 'rejected') {
+        return {
+          validation: false,
+          message: `El pago fue rechazado, por favor reintente. El participante no fue registrado. ${JSON.stringify(response.status_detail, null, 2)}`,
+        };
+      }
+
+    } catch (error) {
+      console.error('Error creating payment:', error);
+    }
   }
-}
 }

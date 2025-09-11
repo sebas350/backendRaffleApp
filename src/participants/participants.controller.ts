@@ -17,8 +17,4 @@ async checkNumber(@Param('number') number: string) {
   return !participant;
 }
   
-  @Post()
-  create(@Body() data: Partial<Participant>): Promise<Participant> {
-    return this.participantsService.create(data);
-  }
 }
