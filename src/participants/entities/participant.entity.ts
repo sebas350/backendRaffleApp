@@ -20,8 +20,8 @@ export class Participant {
   @Column()
   mail: string;
   
-  @Column({ nullable: true })
+  @Column({ default: '' })
   payment_id: string;
-
-}
+  
+  }
 
