@@ -15,4 +15,7 @@ export class CreatePaymentDto {
 
   @IsEmail()
   email: string;
+  
+  @IsString()
+  payment_id?: string;
 }

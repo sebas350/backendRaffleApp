@@ -6,6 +6,7 @@ import { ParticipantsModule } from './participants/participants.module';
 import { Participant } from './participants/entities/participant.entity';
 import { PaymentsModule } from './payments/payments.module';
 import { ConfigModule } from '@nestjs/config';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ConfigModule } from '@nestjs/config';
     ParticipantsModule,
     ConfigModule.forRoot({ isGlobal: true }),
     PaymentsModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

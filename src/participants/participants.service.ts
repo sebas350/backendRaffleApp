@@ -18,7 +18,12 @@ export class ParticipantsService {
   return this.participantRepo.findOne({
     where: { number },
   });
-}  
+}
+
+async removeByPaymentId(paymentId: string): Promise<void> {
+  await this.participantRepo.delete({ payment_id: paymentId });
+}
+  
   async create(data: Partial<Participant>): Promise<Participant> {
   const existing = await this.participantRepo.findOne({
     where: { number: data.number },
